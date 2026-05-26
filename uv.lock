@@ -3710,6 +3710,7 @@ name = "stock-picker"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "chromadb" },
     { name = "crewai", extra = ["tools"] },
     { name = "huggingface-hub" },
     { name = "litellm" },
@@ -3718,6 +3719,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "chromadb", specifier = ">=1.1.1" },
     { name = "crewai", extras = ["tools"], specifier = "==1.14.5a2" },
     { name = "huggingface-hub", specifier = ">=1.16.1" },
     { name = "litellm", specifier = ">=1.86.1" },

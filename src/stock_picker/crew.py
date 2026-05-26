@@ -4,7 +4,9 @@ from crewai_tools import SerperDevTool
 from pydantic import BaseModel, Field
 from typing import List
 # from .tools.push_tool import PushNotificationTool
-from crewai import Memory
+from .memory import ChromaMemory
+
+memory_store = ChromaMemory()
 
 class TrendingCompany(BaseModel):
     """ A company that is in the news and attracting attention """
@@ -38,31 +40,38 @@ class StockPicker():
     @agent
     def trending_company_finder(self) -> Agent:
         return Agent(config=self.agents_config['trending_company_finder'],
-                     tools=[SerperDevTool()], memory=True)
+                     tools=[SerperDevTool()], 
+                     max_iter=1,
+                    # memory=True
+                    )
     
     @agent
     def financial_researcher(self) -> Agent:
         return Agent(config=self.agents_config['financial_researcher'], 
-                     tools=[SerperDevTool()])
+                     tools=[SerperDevTool()],
+                     max_iter=1
+                     )
 
     @agent
     def stock_picker(self) -> Agent:
         return Agent(config=self.agents_config['stock_picker'], 
+                     max_iter=1,
                     #  tools=[PushNotificationTool()], 
-                    memory=True)
+                    # memory=True
+                    )
     
     @task
     def find_trending_companies(self) -> Task:
         return Task(
             config=self.tasks_config['find_trending_companies'],
-            output_pydantic=TrendingCompanyList,
+            output_pydantic=List[TrendingCompanyList],
         )
 
     @task
     def research_trending_companies(self) -> Task:
         return Task(
             config=self.tasks_config['research_trending_companies'],
-            output_pydantic=TrendingCompanyResearchList,
+            output_pydantic=List[TrendingCompanyResearchList],
         )
 
     @task
@@ -88,16 +97,19 @@ class StockPicker():
             tasks=self.tasks, 
             process=Process.hierarchical,
             verbose=True,
-            manager_agent=manager,
-            memory=True,
-            memory_config=Memory(
-                embedder={
-                    "provider": "huggingface",
-                    "config": {
-                        "model_name": "sentence-transformers/all-MiniLM-L6-v2"
-                    }
-                }
-            )
+            manager_agent=manager
+            # memory=True,
+            # memory_config={
+            #     "provider": "mem0",
+            #     "config": {
+            #         "embedder": {
+            #             "provider": "huggingface",
+            #             "config": {
+            #                 "model": "sentence-transformers/all-MiniLM-L6-v2"
+            #             }
+            #         }
+            #     }
+            # }
             # # Long-term memory for persistent storage across sessions
             # long_term_memory = Memory(
             #     storage=LTMSQLiteStorage(
